@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Étude des Changements - Koulikoro, Mali</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- AOS (Animate On Scroll) -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Lightbox CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --hydro-color: #1E88E5;
+            --vegetation-color: #43A047;
+            --sol-nu-color: #F4511E;
+            --background-color: #F5F5F5;
+            --dark-text: #212121;
+            --light-text: #757575;
+            --primary-gradient: linear-gradient(135deg, #1E88E5 0%, #43A047 50%, #F4511E 100%);
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--dark-text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background-color: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        .hero-section {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1566438480900-0609be27a4be?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: white;
+            padding: 150px 0;
+            margin-bottom: 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            bottom: -50px;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: var(--background-color);
+            transform: skewY(-3deg);
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hydro-bg { background-color: var(--hydro-color); color: white; }
+        .vegetation-bg { background-color: var(--vegetation-color); color: white; }
+        .sol-nu-bg { background-color: var(--sol-nu-color); color: white; }
+
+        .hydro-text { color: var(--hydro-color); }
+        .vegetation-text { color: var(--vegetation-color); }
+        .sol-nu-text { color: var(--sol-nu-color); }
+
+        .feature-card {
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+
+        .map-container {
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            height: 400px;
+        }
+
+        #interactive-map {
+            height: 100%;
+            width: 100%;
+            border-radius: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 3px;
+        }
+
+        .timeline {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            background-color: var(--hydro-color);
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -3px;
+            border-radius: 10px;
+        }
+
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            width: 50%;
+            box-sizing: border-box;
+        }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            right: -12px;
+            background-color: white;
+            border: 4px solid var(--hydro-color);
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .left {
+            left: 0;
+        }
+
+        .right {
+            left: 50%;
+        }
+
+        .left::before {
+            content: " ";
+            height: 0;
+            position: absolute;
+            top: 22px;
+            width: 0;
+            z-index: 1;
+            right: 30px;
+            border: medium solid var(--hydro-color);
+            border-width: 10px 0 10px 10px;
+            border-color: transparent transparent transparent var(--hydro-color);
+        }
+
+        .right::before {
+            content: " ";
+            height: 0;
+            position: absolute;
+            top: 22px;
+            width: 0;
+            z-index: 1;
+            left: 30px;
+            border: medium solid var(--hydro-color);
+            border-width: 10px 10px 10px 0;
+            border-color: transparent var(--hydro-color) transparent transparent;
+        }
+
+        .right::after {
+            left: -12px;
+        }
+
+        .content {
+            padding: 20px 30px;
+            background-color: white;
+            position: relative;
+            border-radius: 6px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        footer {
+            background-color: #424242;
+            color: white;
+            padding: 60px 0 30px;
+            margin-top: 80px;
+            position: relative;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: var(--background-color);
+            transform: skewY(-3deg);
+            z-index: 1;
+        }
+
+        .footer-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .social-icons a {
+            color: white;
+            font-size: 20px;
+            margin-right: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            transform: translateY(-5px);
+            color: var(--hydro-color);
+        }
+
+        .floating-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--primary-gradient);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 1000;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        .floating-btn:hover {
+            transform: scale(1.1);
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(30, 136, 229, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(30, 136, 229, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(30, 136, 229, 0); }
+        }
+
+        @media screen and (max-width: 768px) {
+            .timeline::after {
+                left: 31px;
+            }
+
+            .timeline-item {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+
+            .timeline-item::before {
+                left: 60px;
+                border: medium solid var(--hydro-color);
+                border-width: 10px 10px 10px 0;
+                border-color: transparent var(--hydro-color) transparent transparent;
+            }
+
+            .left::after, .right::after {
+                left: 18px;
+            }
+
+            .right {
+                left: 0%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav id="mainNav" class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="fas fa-map-marked-alt me-2"></i>Koulikoro Étude
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#introduction">Introduction</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#methodologie">Méthodologie</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#resultats">Résultats</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#conclusion">Conclusion</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#carte">Carte Interactive</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section text-center">
+        <div class="container hero-content">
+            <h1 class="display-4 fw-bold mb-4 animate__animated animate__fadeInDown">Étude des Changements de Couverture Terrestre</h1>
+            <p class="lead animate__animated animate__fadeInUp animate__delay-1s">Région de Koulikoro, Mali (1990-2024)</p>
+            <a href="#introduction" class="btn btn-primary btn-lg mt-4 animate__animated animate__fadeInUp animate__delay-2s">
+                Découvrir l'étude <i class="fas fa-arrow-down ms-2"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- Introduction -->
+    <section id="introduction" class="py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <h2 class="mb-4">Contexte de l'Étude</h2>
+                    <p class="lead">Analyse des transformations du paysage dans la région de Koulikoro sur 34 ans.</p>
+                    <p>Cette étude analyse les changements de couverture terrestre dans la région de Koulikoro au Mali entre 1990 et 2024, en utilisant les données des satellites Landsat 5 et Landsat 8.</p>
+                    <p>La zone d'étude est située entre 13.0°N et 7.7°O à 7.0°O, couvrant une superficie d'environ 20 km.</p>
+                    <p>Les principales classes étudiées sont : l'hydrographie, la végétation et les sols nus.</p>
+                    <button class="btn btn-outline-primary mt-3">Télécharger le rapport complet</button>
+                </div>
+                <div class="col-lg-6" data-aos="fade-left">
+                    <div class="map-container shadow-lg">
+                        <div id="mini-map" style="height: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Méthodologie -->
+    <section id="methodologie" class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5" data-aos="fade-up">Méthodologie</h2>
+            <div class="row g-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-card">
+                        <div class="card-body text-center p-4">
+                            <div class="icon-circle mb-4 hydro-bg mx-auto">
+                                <i class="fas fa-satellite fa-2x"></i>
+                            </div>
+                            <h5 class="card-title hydro-text">1. Collecte des Données</h5>
+                            <p class="card-text">Utilisation des images satellites Landsat 5 (1990) et Landsat 8 (2024) pour l'analyse comparative avec une résolution de 30m.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-card">
+                        <div class="card-body text-center p-4">
+                            <div class="icon-circle mb-4 vegetation-bg mx-auto">
+                                <i class="fas fa-project-diagram fa-2x"></i>
+                            </div>
+                            <h5 class="card-title vegetation-text">2. Classification</h5>
+                            <p class="card-text">Classification supervisée des images en trois classes principales : hydrographie, végétation et sol nu avec précision de 85%.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-card">
+                        <div class="card-body text-center p-4">
+                            <div class="icon-circle mb-4 sol-nu-bg mx-auto">
+                                <i class="fas fa-chart-line fa-2x"></i>
+                            </div>
+                            <h5 class="card-title sol-nu-text">3. Analyse des Changements</h5>
+                            <p class="card-text">Analyse comparative pour identifier les zones de régénération, régression, stabilité et autres changements significatifs.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="timeline mt-5" data-aos="fade-up">
+                <div class="timeline-item left">
+                    <div class="content">
+                        <h5>1990</h5>
+                        <p>Acquisition des images Landsat 5 TM</p>
+                        <p>Résolution spatiale: 30m</p>
+                    </div>
+                </div>
+                <div class="timeline-item right">
+                    <div class="content">
+                        <h5>2000</h5>
+                        <p>Première analyse intermédiaire</p>
+                        <p>Détection des tendances initiales</p>
+                    </div>
+                </div>
+                <div class="timeline-item left">
+                    <div class="content">
+                        <h5>2010</h5>
+                        <p>Mise à jour des données</p>
+                        <p>Analyse comparative décennale</p>
+                    </div>
+                </div>
+                <div class="timeline-item right">
+                    <div class="content">
+                        <h5>2020</h5>
+                        <p>Acquisition Landsat 8 OLI/TIRS</p>
+                        <p>Nouvelle classification</p>
+                    </div>
+                </div>
+                <div class="timeline-item left">
+                    <div class="content">
+                        <h5>2024</h5>
+                        <p>Analyse finale</p>
+                        <p>Rapport complet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Carte Interactive -->
+    <section id="carte" class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5" data-aos="fade-up">Carte Interactive</h2>
+            <div class="row">
+                <div class="col-lg-8 mx-auto" data-aos="zoom-in">
+                    <div class="map-container shadow-lg">
+                        <div id="interactive-map"></div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="legend-item">
+                                    <div class="legend-color hydro-bg"></div>
+                                    <span>Hydrographie</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="legend-item">
+                                    <div class="legend-color vegetation-bg"></div>
+                                    <span>Végétation</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="legend-item">
+                                    <div class="legend-color sol-nu-bg"></div>
+                                    <span>Sol nu</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-6" data-aos="fade-right">
+                    <h4>Contrôles de la Carte</h4>
+                    <div class="btn-group w-100 mb-3">
+                        <button class="btn btn-outline-primary active" id="show-1990">1990</button>
+                        <button class="btn btn-outline-primary" id="show-2024">2024</button>
+                        <button class="btn btn-outline-primary" id="show-change">Changements</button>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" id="toggle-hydro" checked>
+                        <label class="form-check-label" for="toggle-hydro">Afficher l'hydrographie</label>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" id="toggle-vegetation" checked>
+                        <label class="form-check-label" for="toggle-vegetation">Afficher la végétation</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="toggle-solnu" checked>
+                        <label class="form-check-label" for="toggle-solnu">Afficher les sols nus</label>
+                    </div>
+                </div>
+                <div class="col-md-6" data-aos="fade-left">
+                    <h4>Informations sur la Zone</h4>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 id="map-location-name">Koulikoro, Mali</h5>
+                            <p id="map-location-coords">Coordonnées: 12.8667° N, 7.5667° O</p>
+                            <p id="map-area-info">Superficie: ~20 km de diamètre</p>
+                            <div id="map-stats">
+                                <div class="progress mb-2" style="height: 20px;">
+                                    <div class="progress-bar hydro-bg" role="progressbar" style="width: 15%">Hydro: 15%</div>
+                                </div>
+                                <div class="progress mb-2" style="height: 20px;">
+                                    <div class="progress-bar vegetation-bg" role="progressbar" style="width: 35%">Végétation: 35%</div>
+                                </div>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar sol-nu-bg" role="progressbar" style="width: 50%">Sol nu: 50%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Résultats -->
+    <section id="resultats" class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5" data-aos="fade-up">Résultats</h2>
+
+            <div class="row mb-5 align-items-center">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <div class="map-container shadow-lg">
+                        <a href="Classification_supervise.png" data-lightbox="image-1" data-title="Classification supervisée 1990 et 2024">
+                            <img src="Classification_supervise.png" alt="Classification supervisée 1990 et 2024" class="img-fluid rounded">
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6" data-aos="fade-left">
+                    <h3>Classification Supervisée</h3>
+                    <p class="lead">Comparaison visuelle des changements sur 34 ans</p>
+                    <p>Les classifications pour 1990 et 2024 montrent l'évolution des trois classes principales :</p>
+                    <div class="legend-item"><div class="legend-color hydro-bg"></div><span>Hydrographie: -2% de changement</span></div>
+                    <div class="legend-item"><div class="legend-color vegetation-bg"></div><span>Végétation: -12% de changement</span></div>
+                    <div class="legend-item"><div class="legend-color sol-nu-bg"></div><span>Sol nu: +14% de changement</span></div>
+                    <p class="mt-3">L'analyse révèle une diminution significative de la couverture végétale et une augmentation correspondante des sols nus, particulièrement dans les zones périurbaines.</p>
+                    <button class="btn btn-primary mt-3">Voir les données détaillées</button>
+                </div>
+            </div>
+
+            <div class="row mb-5 align-items-center">
+                <div class="col-lg-6 order-lg-2" data-aos="fade-left">
+                    <div class="map-container shadow-lg">
+                        <a href="Detection_changement.png" data-lightbox="image-2" data-title="Détection des Changements">
+                            <img src="Detection_changement.png" class="img-fluid rounded">
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6 order-lg-1" data-aos="fade-right">
+                    <h3>Détection des Changements</h3>
+                    <p class="lead">Analyse quantitative des transformations</p>
+                    <div class="accordion" id="changesAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                                    Zones de Régénération (8%)
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#changesAccordion">
+                                <div class="accordion-body">
+                                    Principalement le long du fleuve Niger et dans les zones protégées.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                                    Zones de Régression (22%)
+                                </button>
+                            </h2>
+                            <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#changesAccordion">
+                                <div class="accordion-body">
+                                    Conversion de terres végétales en zones urbaines et agricoles.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                                    Zones Stables (60%)
+                                </button>
+                            </h2>
+                            <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#changesAccordion">
+                                <div class="accordion-body">
+                                    Principalement les zones désertiques éloignées et le cours principal du fleuve.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-3">Cette analyse permet d'identifier les zones critiques nécessitant des interventions de conservation.</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <div class="map-container shadow-lg">
+                        <a href="Prediction.png" data-lightbox="image-3" data-title="Projection pour 2030">
+                            <img src="Prediction.png" class="img-fluid rounded">
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6" data-aos="fade-left">
+                    <h3>Projection pour 2030</h3>
+                    <p class="lead">Tendances et prévisions futures</p>
+                    <p>Projection des tendances observées entre 1990 et 2024 pour anticiper les évolutions à l'horizon 2030.</p>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Classe</th>
+                                    <th>1990</th>
+                                    <th>2024</th>
+                                    <th>2030 (proj.)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="hydro-text fw-bold">Hydrographie</td>
+                                    <td>17%</td>
+                                    <td>15%</td>
+                                    <td>14% (-1%)</td>
+                                </tr>
+                                <tr>
+                                    <td class="vegetation-text fw-bold">Végétation</td>
+                                    <td>47%</td>
+                                    <td>35%</td>
+                                    <td>30% (-5%)</td>
+                                </tr>
+                                <tr>
+                                    <td class="sol-nu-text fw-bold">Sol nu</td>
+                                    <td>36%</td>
+                                    <td>50%</td>
+                                    <td>56% (+6%)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-exclamation-triangle me-2"></i> Ces projections supposent la continuation des tendances actuelles sans intervention.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Conclusion -->
+    <section id="conclusion" class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5" data-aos="fade-up">Conclusion</h2>
+            <div class="row">
+                <div class="col-lg-8 mx-auto" data-aos="zoom-in">
+                    <div class="card shadow-lg border-0">
+                        <div class="card-body p-5 text-center">
+                            <i class="fas fa-leaf fa-3x vegetation-text mb-4"></i>
+                            <h3 class="mb-4">Synthèse des Résultats</h3>
+                            <p class="lead">Cette étude révèle des changements significatifs dans la couverture terrestre de la région de Koulikoro entre 1990 et 2024.</p>
+                            <div class="row mt-4 g-4">
+                                <div class="col-md-4">
+                                    <div class="p-3 rounded bg-light">
+                                        <i class="fas fa-tint fa-2x hydro-text mb-3"></i>
+                                        <h5>Hydrographie</h5>
+                                        <p>-2% en 34 ans</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-3 rounded bg-light">
+                                        <i class="fas fa-tree fa-2x vegetation-text mb-3"></i>
+                                        <h5>Végétation</h5>
+                                        <p>-12% en 34 ans</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-3 rounded bg-light">
+                                        <i class="fas fa-mountain fa-2x sol-nu-text mb-3"></i>
+                                        <h5>Sol nu</h5>
+                                        <p>+14% en 34 ans</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="my-4">
+                            <p>Les résultats montrent une évolution contrastée selon les zones, avec des secteurs de régénération végétale et d'autres connaissant une augmentation des sols nus.</p>
+                            <p>Ces données sont essentielles pour orienter les politiques de gestion durable des terres dans cette région du Mali.</p>
+                            <button class="btn btn-primary btn-lg mt-4">Télécharger le rapport complet</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container footer-content">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h5><i class="fas fa-map-marked-alt me-2"></i>Étude des Changements - Koulikoro</h5>
+                    <p>Analyse des données Landsat 5 et Landsat 8 (1990-2024)</p>
+                    <div class="social-icons mt-3">
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fas fa-envelope"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <h5>Sources de Données</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-satellite me-2"></i>Landsat 5 TM</li>
+                        <li><i class="fas fa-satellite me-2"></i>Landsat 8 OLI/TIRS</li>
+                        <li><i class="fas fa-database me-2"></i>USGS EarthExplorer</li>
+                        <li><i class="fas fa-globe-africa me-2"></i>OpenStreetMap</li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <h5>Contact</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-user me-2"></i>Mamoudou Sow</li>
+                        <li><i class="fas fa-university me-2"></i>Université Gaston Berger (UGB)</li>
+                        <li><i class="fas fa-phone me-2"></i>+223 XX XX XX XX</li>
+                        <li><i class="fas fa-map-marker-alt me-2"></i>Saint-Louis, Sénégal</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="mt-4 mb-4" style="border-color: rgba(255,255,255,0.1);">
+            <div class="text-center">
+                <small>&copy; 2024 Étude Koulikoro. Tous droits réservés. | <a href="#" class="text-white">Politique de confidentialité</a> | <a href="#" class="text-white">Conditions d'utilisation</a></small>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bouton flottant -->
+    <a href="#" class="floating-btn animate__animated animate__bounceIn animate__delay-3s">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- AOS JS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- Lightbox JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+    <!-- Custom JS -->
+    <script>
+        // Initialisation AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('mainNav');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Initialisation de la mini carte
+        const miniMap = L.map('mini-map').setView([12.8667, -7.5667], 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(miniMap);
+
+        // Ajout d'un marqueur pour Koulikoro
+        L.marker([12.8667, -7.5667]).addTo(miniMap)
+            .bindPopup('Koulikoro, Mali')
+            .openPopup();
+
+        // Ajout d'un cercle pour la zone d'étude
+        L.circle([12.8667, -7.5667], {
+            color: '#1E88E5',
+            fillColor: '#1E88E5',
+            fillOpacity: 0.2,
+            radius: 10000
+        }).addTo(miniMap).bindTooltip("Zone d'étude (20km)");
+
+        // Initialisation de la carte interactive principale
+        const interactiveMap = L.map('interactive-map').setView([12.8667, -7.5667], 11);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(interactiveMap);
+
+        // Couches simulées (en production, vous utiliseriez des couches réelles)
+        const hydro1990 = L.geoJSON().addTo(interactiveMap);
+        const vegetation1990 = L.geoJSON().addTo(interactiveMap);
+        const solNu1990 = L.geoJSON().addTo(interactiveMap);
+
+        const hydro2024 = L.geoJSON().addTo(interactiveMap);
+        const vegetation2024 = L.geoJSON().addTo(interactiveMap);
+        const solNu2024 = L.geoJSON().addTo(interactiveMap);
+
+        const changesLayer = L.geoJSON().addTo(interactiveMap);
+
+        // Gestion des boutons de contrôle
+        document.getElementById('show-1990').addEventListener('click', function() {
+            // En production, vous activeriez/désactiveriez les couches appropriées
+            alert("Affichage des données de 1990");
+        });
+
+        document.getElementById('show-2024').addEventListener('click', function() {
+            alert("Affichage des données de 2024");
+        });
+
+        document.getElementById('show-change').addEventListener('click', function() {
+            alert("Affichage des changements entre 1990 et 2024");
+        });
+
+        // Gestion des cases à cocher
+        document.getElementById('toggle-hydro').addEventListener('change', function(e) {
+            alert((e.target.checked ? "Affichage" : "Masquage") + " de la couche hydrographie");
+        });
+
+        document.getElementById('toggle-vegetation').addEventListener('change', function(e) {
+            alert((e.target.checked ? "Affichage" : "Masquage") + " de la couche végétation");
+        });
+
+        document.getElementById('toggle-solnu').addEventListener('change', function(e) {
+            alert((e.target.checked ? "Affichage" : "Masquage") + " de la couche sol nu");
+        });
+
+        // Bouton de retour en haut
+        document.querySelector('.floating-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>

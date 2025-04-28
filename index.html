@@ -14,14 +14,14 @@
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Lightbox CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <style>
         :root {
             --hydro-color: #1E88E5;
             --vegetation-color: #43A047;
             --sol-nu-color: #F4511E;
+            --agricole-color: #AED581; /* Light green for Surface agricole */
+            --habitat-color: #E53935; /* Red for Habitat */
             --background-color: #F5F5F5;
             --dark-text: #212121;
             --light-text: #757575;
@@ -80,10 +80,14 @@
         .hydro-bg { background-color: var(--hydro-color); color: white; }
         .vegetation-bg { background-color: var(--vegetation-color); color: white; }
         .sol-nu-bg { background-color: var(--sol-nu-color); color: white; }
+        .agricole-bg { background-color: var(--agricole-color); color: white; }
+        .habitat-bg { background-color: var(--habitat-color); color: white; }
 
         .hydro-text { color: var(--hydro-color); }
         .vegetation-text { color: var(--vegetation-color); }
         .sol-nu-text { color: var(--sol-nu-color); }
+        .agricole-text { color: var(--agricole-color); }
+        .habitat-text { color: var(--habitat-color); }
 
         .feature-card {
             border: none;
@@ -357,7 +361,7 @@
                     <p class="lead">Analyse des transformations du paysage dans la région de Koulikoro sur 34 ans.</p>
                     <p>Cette étude analyse les changements de couverture terrestre dans la région de Koulikoro au Mali entre 1990 et 2024, en utilisant les données des satellites Landsat 5 et Landsat 8.</p>
                     <p>La zone d'étude est située entre 13.0°N et 7.7°O à 7.0°O, couvrant une superficie d'environ 20 km.</p>
-                    <p>Les principales classes étudiées sont : l'hydrographie, la végétation et les sols nus.</p>
+                    <p>Les principales classes étudiées sont : l'hydrographie, la végétation, les sols nus, les surfaces agricoles et les habitats.</p>
                     <button class="btn btn-outline-primary mt-3">Télécharger le rapport complet</button>
                 </div>
                 <div class="col-lg-6" data-aos="fade-left">
@@ -392,7 +396,7 @@
                                 <i class="fas fa-project-diagram fa-2x"></i>
                             </div>
                             <h5 class="card-title vegetation-text">2. Classification</h5>
-                            <p class="card-text">Classification supervisée des images en trois classes principales : hydrographie, végétation et sol nu avec précision de 85%.</p>
+                            <p class="card-text">Classification supervisée des images en cinq classes principales : hydrographie, végétation, sol nu, surface agricole et habitat avec précision de 85%.</p>
                         </div>
                     </div>
                 </div>
@@ -479,6 +483,18 @@
                                     <span>Sol nu</span>
                                 </div>
                             </div>
+                            <div class="col-md-4">
+                                <div class="legend-item">
+                                    <div class="legend-color agricole-bg"></div>
+                                    <span>Surface agricole</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="legend-item">
+                                    <div class="legend-color habitat-bg"></div>
+                                    <span>Habitat</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -499,9 +515,17 @@
                         <input class="form-check-input" type="checkbox" id="toggle-vegetation" checked>
                         <label class="form-check-label" for="toggle-vegetation">Afficher la végétation</label>
                     </div>
-                    <div class="form-check form-switch">
+                    <div class="form-check form-switch mb-2">
                         <input class="form-check-input" type="checkbox" id="toggle-solnu" checked>
                         <label class="form-check-label" for="toggle-solnu">Afficher les sols nus</label>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" id="toggle-agricole" checked>
+                        <label class="form-check-label" for="toggle-agricole">Afficher les surfaces agricoles</label>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" id="toggle-habitat" checked>
+                        <label class="form-check-label" for="toggle-habitat">Afficher les habitats</label>
                     </div>
                 </div>
                 <div class="col-md-6" data-aos="fade-left">
@@ -518,8 +542,14 @@
                                 <div class="progress mb-2" style="height: 20px;">
                                     <div class="progress-bar vegetation-bg" role="progressbar" style="width: 35%">Végétation: 35%</div>
                                 </div>
-                                <div class="progress" style="height: 20px;">
-                                    <div class="progress-bar sol-nu-bg" role="progressbar" style="width: 50%">Sol nu: 50%</div>
+                                <div class="progress mb-2" style="height: 20px;">
+                                    <div class="progress-bar sol-nu-bg" role="progressbar" style="width: 40%">Sol nu: 40%</div>
+                                </div>
+                                <div class="progress mb-2" style="height: 20px;">
+                                    <div class="progress-bar agricole-bg" role="progressbar" style="width: 5%">Surface agricole: 5%</div>
+                                </div>
+                                <div class="progress mb-2" style="height: 20px;">
+                                    <div class="progress-bar habitat-bg" role="progressbar" style="width: 5%">Habitat: 5%</div>
                                 </div>
                             </div>
                         </div>
@@ -537,19 +567,19 @@
             <div class="row mb-5 align-items-center">
                 <div class="col-lg-6" data-aos="fade-right">
                     <div class="map-container shadow-lg">
-                        <a href="Classification_supervise.png" data-lightbox="image-1" data-title="Classification supervisée 1990 et 2024">
-                            <img src="Classification_supervise.png" alt="Classification supervisée 1990 et 2024" class="img-fluid rounded">
-                        </a>
+                        <img src="Classification_supervise_1.png" alt="Classification supervisée 1990 et 2024" class="img-fluid rounded clickable-image" data-bs-toggle="modal" data-bs-target="#imageModal1">
                     </div>
                 </div>
                 <div class="col-lg-6" data-aos="fade-left">
                     <h3>Classification Supervisée</h3>
                     <p class="lead">Comparaison visuelle des changements sur 34 ans</p>
-                    <p>Les classifications pour 1990 et 2024 montrent l'évolution des trois classes principales :</p>
+                    <p>Les classifications pour 1990 et 2024 montrent l'évolution des cinq classes principales :</p>
                     <div class="legend-item"><div class="legend-color hydro-bg"></div><span>Hydrographie: -2% de changement</span></div>
                     <div class="legend-item"><div class="legend-color vegetation-bg"></div><span>Végétation: -12% de changement</span></div>
-                    <div class="legend-item"><div class="legend-color sol-nu-bg"></div><span>Sol nu: +14% de changement</span></div>
-                    <p class="mt-3">L'analyse révèle une diminution significative de la couverture végétale et une augmentation correspondante des sols nus, particulièrement dans les zones périurbaines.</p>
+                    <div class="legend-item"><div class="legend-color sol-nu-bg"></div><span>Sol nu: +10% de changement</span></div>
+                    <div class="legend-item"><div class="legend-color agricole-bg"></div><span>Surface agricole: +2% de changement</span></div>
+                    <div class="legend-item"><div class="legend-color habitat-bg"></div><span>Habitat: +2% de changement</span></div>
+                    <p class="mt-3">L'analyse révèle une diminution significative de la couverture végétale, une augmentation des sols nus, et une légère expansion des surfaces agricoles et habitats, particulièrement dans les zones périurbaines.</p>
                     <button class="btn btn-primary mt-3">Voir les données détaillées</button>
                 </div>
             </div>
@@ -557,9 +587,7 @@
             <div class="row mb-5 align-items-center">
                 <div class="col-lg-6 order-lg-2" data-aos="fade-left">
                     <div class="map-container shadow-lg">
-                        <a href="Detection_changement.png" data-lightbox="image-2" data-title="Détection des Changements">
-                            <img src="Detection_changement.png" class="img-fluid rounded">
-                        </a>
+                        <img src="Detection_changement_3.png" class="img-fluid rounded clickable-image" data-bs-toggle="modal" data-bs-target="#imageModal2">
                     </div>
                 </div>
                 <div class="col-lg-6 order-lg-1" data-aos="fade-right">
@@ -586,7 +614,7 @@
                             </h2>
                             <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#changesAccordion">
                                 <div class="accordion-body">
-                                    Conversion de terres végétales en zones urbaines et agricoles.
+                                    Conversion de terres végétales en zones urbaines, habitats, et surfaces agricoles.
                                 </div>
                             </div>
                         </div>
@@ -610,9 +638,7 @@
             <div class="row">
                 <div class="col-lg-6" data-aos="fade-right">
                     <div class="map-container shadow-lg">
-                        <a href="Prediction.png" data-lightbox="image-3" data-title="Projection pour 2030">
-                            <img src="Prediction.png" class="img-fluid rounded">
-                        </a>
+                        <img src="Prediction_1.png" class="img-fluid rounded clickable-image" data-bs-toggle="modal" data-bs-target="#imageModal3">
                     </div>
                 </div>
                 <div class="col-lg-6" data-aos="fade-left">
@@ -644,9 +670,21 @@
                                 </tr>
                                 <tr>
                                     <td class="sol-nu-text fw-bold">Sol nu</td>
-                                    <td>36%</td>
-                                    <td>50%</td>
-                                    <td>56% (+6%)</td>
+                                    <td>30%</td>
+                                    <td>40%</td>
+                                    <td>44% (+4%)</td>
+                                </tr>
+                                <tr>
+                                    <td class="agricole-text fw-bold">Surface agricole</td>
+                                    <td>3%</td>
+                                    <td>5%</td>
+                                    <td>6% (+1%)</td>
+                                </tr>
+                                <tr>
+                                    <td class="habitat-text fw-bold">Habitat</td>
+                                    <td>3%</td>
+                                    <td>5%</td>
+                                    <td>6% (+1%)</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -689,12 +727,26 @@
                                     <div class="p-3 rounded bg-light">
                                         <i class="fas fa-mountain fa-2x sol-nu-text mb-3"></i>
                                         <h5>Sol nu</h5>
-                                        <p>+14% en 34 ans</p>
+                                        <p>+10% en 34 ans</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-3 rounded bg-light">
+                                        <i class="fas fa-tractor fa-2x agricole-text mb-3"></i>
+                                        <h5>Surface agricole</h5>
+                                        <p>+2% en 34 ans</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-3 rounded bg-light">
+                                        <i class="fas fa-home fa-2x habitat-text mb-3"></i>
+                                        <h5>Habitat</h5>
+                                        <p>+2% en 34 ans</p>
                                     </div>
                                 </div>
                             </div>
                             <hr class="my-4">
-                            <p>Les résultats montrent une évolution contrastée selon les zones, avec des secteurs de régénération végétale et d'autres connaissant une augmentation des sols nus.</p>
+                            <p>Les résultats montrent une évolution contrastée selon les zones, avec des secteurs de régénération végétale et d'autres connaissant une augmentation des sols nus, des surfaces agricoles et des habitats.</p>
                             <p>Ces données sont essentielles pour orienter les politiques de gestion durable des terres dans cette région du Mali.</p>
                             <button class="btn btn-primary btn-lg mt-4">Télécharger le rapport complet</button>
                         </div>
@@ -731,15 +783,15 @@
                     <h5>Contact</h5>
                     <ul class="list-unstyled">
                         <li><i class="fas fa-user me-2"></i>Mamoudou Sow</li>
-                        <li><i class="fas fa-university me-2"></i>Université Gaston Berger (UGB)</li>
+                        <li><i class="fas fa-university me-2"></i>Université de Bamako</li>
                         <li><i class="fas fa-phone me-2"></i>+223 XX XX XX XX</li>
-                        <li><i class="fas fa-map-marker-alt me-2"></i>Saint-Louis, Sénégal</li>
+                        <li><i class="fas fa-map-marker-alt me-2"></i>Bamako, Mali</li>
                     </ul>
                 </div>
             </div>
             <hr class="mt-4 mb-4" style="border-color: rgba(255,255,255,0.1);">
             <div class="text-center">
-                <small>&copy; 2024 Étude Koulikoro. Tous droits réservés. | <a href="#" class="text-white">Politique de confidentialité</a> | <a href="#" class="text-white">Conditions d'utilisation</a></small>
+                <small>© 2024 Étude Koulikoro. Tous droits réservés. | <a href="#" class="text-white">Politique de confidentialité</a> | <a href="#" class="text-white">Conditions d'utilisation</a></small>
             </div>
         </div>
     </footer>
@@ -755,8 +807,6 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- AOS JS -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <!-- Lightbox JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
     <!-- Custom JS -->
     <script>
         // Initialisation AOS
@@ -779,7 +829,7 @@
         // Initialisation de la mini carte
         const miniMap = L.map('mini-map').setView([12.8667, -7.5667], 10);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(miniMap);
 
         // Ajout d'un marqueur pour Koulikoro
@@ -798,23 +848,26 @@
         // Initialisation de la carte interactive principale
         const interactiveMap = L.map('interactive-map').setView([12.8667, -7.5667], 11);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(interactiveMap);
 
         // Couches simulées (en production, vous utiliseriez des couches réelles)
         const hydro1990 = L.geoJSON().addTo(interactiveMap);
         const vegetation1990 = L.geoJSON().addTo(interactiveMap);
         const solNu1990 = L.geoJSON().addTo(interactiveMap);
+        const agricole1990 = L.geoJSON().addTo(interactiveMap);
+        const habitat1990 = L.geoJSON().addTo(interactiveMap);
 
         const hydro2024 = L.geoJSON().addTo(interactiveMap);
         const vegetation2024 = L.geoJSON().addTo(interactiveMap);
         const solNu2024 = L.geoJSON().addTo(interactiveMap);
+        const agricole2024 = L.geoJSON().addTo(interactiveMap);
+        const habitat2024 = L.geoJSON().addTo(interactiveMap);
 
         const changesLayer = L.geoJSON().addTo(interactiveMap);
 
         // Gestion des boutons de contrôle
         document.getElementById('show-1990').addEventListener('click', function() {
-            // En production, vous activeriez/désactiveriez les couches appropriées
             alert("Affichage des données de 1990");
         });
 
@@ -839,6 +892,14 @@
             alert((e.target.checked ? "Affichage" : "Masquage") + " de la couche sol nu");
         });
 
+        document.getElementById('toggle-agricole').addEventListener('change', function(e) {
+            alert((e.target.checked ? "Affichage" : "Masquage") + " de la couche surface agricole");
+        });
+
+        document.getElementById('toggle-habitat').addEventListener('change', function(e) {
+            alert((e.target.checked ? "Affichage" : "Masquage") + " de la couche habitat");
+        });
+
         // Bouton de retour en haut
         document.querySelector('.floating-btn').addEventListener('click', function(e) {
             e.preventDefault();
@@ -848,5 +909,50 @@
             });
         });
     </script>
+
+    <!-- Modal for Image 1 -->
+    <div class="modal fade" id="imageModal1" tabindex="-1" aria-labelledby="imageModal1Label" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageModal1Label">Classification Supervisée</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <img src="Classification_supervise_1.png" class="img-fluid" alt="Classification supervisée 1990 et 2024">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Image 2 -->
+    <div class="modal fade" id="imageModal2" tabindex="-1" aria-labelledby="imageModal2Label" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageModal2Label">Détection des Changements</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <img src="Detection_changement_3.png" class="img-fluid" alt="Détection des changements">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Image 3 -->
+    <div class="modal fade" id="imageModal3" tabindex="-1" aria-labelledby="imageModal3Label" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageModal3Label">Projection pour 2030</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <img src="Prediction_1.png" class="img-fluid" alt="Projection pour 2030">
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
